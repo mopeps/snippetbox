@@ -4,6 +4,10 @@
 	<head>
 		<meta charset='utf-8'>
 		<title>{{template "title" .}} - Snippetbox</title>
+
+		<link rel='stylesheet' href='/static/css/main.css'>
+		<link rel='shortcut icon' href='/static/img/favicon.ico'>
+		<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
 	</head>
 	<body>
 		<header>
@@ -16,6 +20,8 @@
 			{{template "body" .}}
 		</section>
 		{{template "footer" .}}
+		
+		<script src='/static/js/main.js' type="text/javascript"></script>
 	</body>
 </html>
 {{end}}

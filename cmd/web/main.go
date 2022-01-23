@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/mopeps/snippetbox/pkg/models/pgql"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/mopeps/snippetbox/pkg/models/mysql"
 )
 
 type application struct {
@@ -50,7 +50,7 @@ func main() {
 }
 
 func openDB() (*sql.DB, error) {
-	db, err := sql.Open("pgx", os.Getenv("DATABASE_URL"))
+	db, err := sql.Open("mysql", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		return nil, err
 	}

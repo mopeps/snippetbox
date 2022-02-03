@@ -24,6 +24,7 @@ func (m *SnippetModel) Insert(title, content, expires string) (int, error) {
 	// method returns a sql.Result object, which contains some basic 
 	// information about what happened when the statement was executed.
 	result, err := m.DB.Exec(stmt, title, content, expires)
+
 	if err != nil {
 		return 0, err
 	}
@@ -48,6 +49,7 @@ func (m *SnippetModel) Get(id int) (*models.Snippet, error) {
 	s := &models.Snippet{}
 
 	err :=  m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Title, &s.Content, &s.Created, &s.Expires)
+
 	if err == sql.ErrNoRows {
 		return nil, models.ErrNoRecord
 	} else if err != nil {

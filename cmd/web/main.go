@@ -1,29 +1,32 @@
-	package main
+package main
 
 import (
 	"database/sql"
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+
 	"github.com/mopeps/snippetbox/pkg/models/mysql"
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog *log.Logger
-	snippets *pgql.SnippetModel
+	errorLog      *log.Logger
+	infoLog       *log.Logger
+	snippets      *pgql.SnippetModel
+	templateCache map[string]*(template.Template)
 }
 
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
-	flag.Parse()   
+	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	
+
 	// To keep the main() function tidy I've put the code for creating a connection
 	// pool into the separate openDB() funciton below. We pass openDB() the dsn
 	// from the command-line flag.
@@ -32,16 +35,23 @@ func main() {
 		errorLog.Fatal(err)
 	}
 	defer db.Close()
-	app := &application{
-		errorLog: errorLog,
-		infoLog: infoLog,
-		snippets: &pgql.SnippetModel{DB: db},
+
+	templateCache, err := newTemplateCache("./ui/html/")
+	if err != nil {
+		errorLog.Fatal(err)
 	}
 
-	srv := &http.Server {
-		Addr:	*addr,
+	app := &application{
+		errorLog:      errorLog,
+		infoLog:       infoLog,
+		snippets:      &pgql.SnippetModel{DB: db},
+		templateCache: templateCache,
+	}
+
+	srv := &http.Server{
+		Addr:     *addr,
 		ErrorLog: errorLog,
-		Handler: app.routes(),
+		Handler:  app.routes(),
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)

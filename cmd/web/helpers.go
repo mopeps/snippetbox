@@ -1,11 +1,39 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"runtime/debug"
 )
 
+
+
+func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
+	// Retrieve the appropiate template set from the cache based on the page name
+	// (like 'home.page.tmpl'). If no entry exists in the cache with the 
+	// provided name, call the serverError helper method that we made earlier.
+	ts, ok := app.templateCache[name]
+	if !ok {
+		app.serverError(w, fmt.Errorf("The template %s does not exists", name))
+		return
+	}
+	
+	// Initialize a new buffer
+	buf := new(bytes.Buffer)
+
+
+	// Execute the template set, passin in any dynamic data
+	err := ts.Execute(w, td)
+	if err != nil {
+		app.serverError(w, err)
+	}
+
+	// Write the contents of the buffer to the http.ResponseWriter. Again, this 
+	// is another time where we pass our http.ResponseWriter to a function that
+	// takes an io.Writer
+	buf.WriteTo(w)
+}
 // The serverError helper writes an error message and stack trace to the errorLog
 // then sends a generic 500 internal Server Error response to the user .
 

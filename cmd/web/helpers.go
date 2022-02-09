@@ -5,10 +5,21 @@ import (
 	"fmt"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
+// Create an addDefaultData helper method. This takes a pointer to a templateData
+// struct, adds the current year to the CurrentYear field, and then returns
+// the pointer. Again, we 're not using the *http.Request parameter at the moment,
+// but we will do later in the book
 
-
+func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
+	if td == nil {
+		td = &templateData{}
+	}
+	td.CurrentYear = time.Now().Year()
+	return td
+}
 func (app *application) render(w http.ResponseWriter, r *http.Request, name string, td *templateData) {
 	// Retrieve the appropiate template set from the cache based on the page name
 	// (like 'home.page.tmpl'). If no entry exists in the cache with the 
@@ -24,7 +35,7 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 
 
 	// Execute the template set, passin in any dynamic data
-	err := ts.Execute(w, td)
+	err := ts.Execute(w, app.addDefaultData(td, r))
 	if err != nil {
 		app.serverError(w, err)
 	}

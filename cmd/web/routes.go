@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+	
+	"github.com/gorilla/mux"
 	"github.com/justinas/alice"
 )
 
@@ -9,13 +11,13 @@ func (app *application) routes() http.Handler {
 	// Create a middleware chain containing our 'standar' middleware
 	// which will be used for every request our application receives.
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", app.home)
-	mux.HandleFunc("/snippet", app.showSnippet)
-	mux.HandleFunc("/snippet/create", app.createSnippet)
+	mux := mux.NewRouter()
+	mux.HandleFunc("/", app.home).Methods("GET")
+	mux.HandleFunc("/snippet/create", app.createSnippet).Methods("GET","POST")
+	mux.HandleFunc("/snippet/{id}", app.showSnippet).Methods("GET")
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", http.StripPrefix("/static", fileServer)).Methods("GET")
 	
 	// Pass the servemux as the 'next' parameter to the secureHeaders middleware
 	// Because secureHeaders is just a function, and the function returns a 

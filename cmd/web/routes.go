@@ -13,7 +13,8 @@ func (app *application) routes() http.Handler {
 	standardMiddleware := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", app.home).Methods("GET")
-	mux.HandleFunc("/snippet/create", app.createSnippet).Methods("GET","POST")
+	mux.HandleFunc("/snippet/create", app.createSnippet).Methods("POST")
+	mux.HandleFunc("/snippet/create", app.createSnippetForm).Methods("GET")
 	mux.HandleFunc("/snippet/{id}", app.showSnippet).Methods("GET")
 
 	fileServer := http.FileServer(http.Dir("./ui/static/"))

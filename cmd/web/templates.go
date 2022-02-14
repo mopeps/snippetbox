@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mopeps/snippetbox/pkg/models"
+	"github.com/mopeps/snippetbox/pkg/forms"
 )
 
 // Define a templateData type to act as athe holding structure for
@@ -15,6 +16,7 @@ import (
 
 type templateData struct {
 	CurrentYear int
+	Form *forms.Form
 	Snippet *models.Snippet
 	Snippets []*models.Snippet
 }

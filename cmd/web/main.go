@@ -9,6 +9,7 @@ import (
 	"os"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/sessions"
 
 	"github.com/mopeps/snippetbox/pkg/models/mysql"
 )
@@ -16,6 +17,7 @@ import (
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
+	session		  *sessions.Session
 	snippets      *pgql.SnippetModel
 	templateCache map[string]*(template.Template)
 }
@@ -26,7 +28,9 @@ func main() {
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-
+	
+	secret := flag.String("secret", "super-secret-key", "Secret key")
+	flag.Parse()
 	// To keep the main() function tidy I've put the code for creating a connection
 	// pool into the separate openDB() funciton below. We pass openDB() the dsn
 	// from the command-line flag.
@@ -40,10 +44,13 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-
+	
+	cookieStore := sessions.NewCookieStore([]byte(*secret))
+	session := sessions.NewSession(cookieStore, "our-session")
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
+		session:	   session,
 		snippets:      &pgql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}

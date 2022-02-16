@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mopeps/snippetbox/pkg/models"
 	"github.com/mopeps/snippetbox/pkg/forms"
+	"github.com/mopeps/snippetbox/pkg/models"
 )
 
 // Define a templateData type to act as athe holding structure for
@@ -16,6 +16,7 @@ import (
 
 type templateData struct {
 	CurrentYear int
+	Flash interface{}
 	Form *forms.Form
 	Snippet *models.Snippet
 	Snippets []*models.Snippet

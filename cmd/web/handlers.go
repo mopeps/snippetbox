@@ -40,9 +40,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-
+	
+	fm := app.session.Flashes("success-message")
 	// Use the new render helper.
 	app.render(w, r, "show.page.tmpl", &templateData{
+		Flash: fm,
 		Snippet: s,
 	})
 
@@ -77,5 +79,9 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
+
+	app.session.AddFlash("Snippet successfully created!","success-message")
+	app.session.Save(r, w)
+
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
 }

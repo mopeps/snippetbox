@@ -1,12 +1,14 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
@@ -47,6 +49,8 @@ func main() {
 	
 	cookieStore := sessions.NewCookieStore([]byte(*secret))
 	session := sessions.NewSession(cookieStore, "our-session")
+	session.Options.Secure = true
+
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
@@ -54,15 +58,24 @@ func main() {
 		snippets:      &pgql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
+	
+	tlsConfig := &tls.Config{
+    PreferServerCipherSuites: true,
+    CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 
 	srv := &http.Server{
 		Addr:     *addr,
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
+		TLSConfig: tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	infoLog.Printf("Starting server on %s", *addr)
-	err = srv.ListenAndServe()
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errorLog.Fatal(err)
 }
 

@@ -13,13 +13,13 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/sessions"
 
-	"github.com/mopeps/snippetbox/pkg/models/mysql"
+	pgql "github.com/mopeps/snippetbox/pkg/models/mysql"
 )
 
 type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
-	session		  *sessions.Session
+	session       *sessions.Session
 	snippets      *pgql.SnippetModel
 	templateCache map[string]*(template.Template)
 }
@@ -27,12 +27,11 @@ type application struct {
 func main() {
 	addr := flag.String("addr", ":4000", "HTTP network address")
 	flag.Parse()
-
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
-	
 	secret := flag.String("secret", "super-secret-key", "Secret key")
 	flag.Parse()
+
 	// To keep the main() function tidy I've put the code for creating a connection
 	// pool into the separate openDB() funciton below. We pass openDB() the dsn
 	// from the command-line flag.
@@ -46,7 +45,7 @@ func main() {
 	if err != nil {
 		errorLog.Fatal(err)
 	}
-	
+
 	cookieStore := sessions.NewCookieStore([]byte(*secret))
 	session := sessions.NewSession(cookieStore, "our-session")
 	session.Options.Secure = true
@@ -54,21 +53,21 @@ func main() {
 	app := &application{
 		errorLog:      errorLog,
 		infoLog:       infoLog,
-		session:	   session,
+		session:       session,
 		snippets:      &pgql.SnippetModel{DB: db},
 		templateCache: templateCache,
 	}
-	
+
 	tlsConfig := &tls.Config{
-    PreferServerCipherSuites: true,
-    CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
+		PreferServerCipherSuites: true,
+		CurvePreferences:         []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
-		ErrorLog: errorLog,
-		Handler:  app.routes(),
-		TLSConfig: tlsConfig,
+		Addr:         *addr,
+		ErrorLog:     errorLog,
+		Handler:      app.routes(),
+		TLSConfig:    tlsConfig,
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

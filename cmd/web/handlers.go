@@ -40,11 +40,11 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 		app.serverError(w, err)
 		return
 	}
-	
+
 	fm := app.session.Flashes("success-message")
 	// Use the new render helper.
 	app.render(w, r, "show.page.tmpl", &templateData{
-		Flash: fm,
+		Flash:   fm,
 		Snippet: s,
 	})
 
@@ -57,7 +57,7 @@ func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
-	
+
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
@@ -66,7 +66,7 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 
 	form := forms.New(r.PostForm)
 	form.Required("title", "content", "expires")
-	form.MaxLength("title",100)
+	form.MaxLength("title", 100)
 	form.PermittedValues("expires", "365", "7", "1")
 
 	if !form.Valid() {
@@ -80,8 +80,50 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.session.AddFlash("Snippet successfully created!","success-message")
+	app.session.AddFlash("Snippet successfully created!", "success-message")
 	app.session.Save(r, w)
 
 	http.Redirect(w, r, fmt.Sprintf("/snippet/%d", id), http.StatusSeeOther)
+}
+
+func (app *application) signupUserForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "signup.page.tmpl", &templateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (app *application) signupUser(w http.ResponseWriter, r *http.Request) {
+	// Parse the form data.
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	// Validate the form contents using the form helper we just made
+	form := form.New(r.PostForm)
+
+	form.Required("name", "email", "password")
+	form.MaxLength("name", 255)
+	form.MaxLength("email", 255)
+	form.MatchesPattern("email", forms.EmailRX)
+	form.MinLength("password", 10)
+
+	// If there are any errors, redisplay the signup form
+	if !form.Valid() {
+		app.render(w, r, "signup.page.tmpl", &templateData{Form: form})
+		return
+	}
+
+	// Otherwise send a placeholder response (for now!).
+	fmt.Fprintln(w, "Creates a new user...")
+}
+
+func (app *application) loginUserForm(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Display the user login form")
+}
+func (app *application) loginUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "login the user...")
+}
+func (app *application) logoutUser(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Logout the User...")
 }

@@ -22,6 +22,7 @@ type application struct {
 	session       *sessions.Session
 	snippets      *pgql.SnippetModel
 	templateCache map[string]*(template.Template)
+	users         *pgql.UserModel
 }
 
 func main() {
@@ -56,6 +57,7 @@ func main() {
 		session:       session,
 		snippets:      &pgql.SnippetModel{DB: db},
 		templateCache: templateCache,
+		users:         &pgql.UserModel{DB: db},
 	}
 
 	tlsConfig := &tls.Config{

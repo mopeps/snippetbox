@@ -15,14 +15,15 @@ import (
 // to it as as the build progresses.
 
 type templateData struct {
-	CurrentYear int
-	Flash interface{}
-	Form *forms.Form
-	Snippet *models.Snippet
-	Snippets []*models.Snippet
+	CurrentYear     int
+	Flash           interface{}
+	Form            *forms.Form
+	IsAuthenticated bool
+	Snippet         *models.Snippet
+	Snippets        []*models.Snippet
 }
 
-// Create a humanDate function which returns a nicely formatted string 
+// Create a humanDate function which returns a nicely formatted string
 // representation of a time.Time object.
 
 func humanDate(t time.Time) string {
@@ -66,7 +67,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 			return nil, err
 		}
 
-		// Use the ParserGlob method to add any 'partial' templates to the 
+		// Use the ParserGlob method to add any 'partial' templates to the
 		// template set (in our case, it's just the 'footer' partial at the
 		// moment)
 		ts, err = ts.ParseGlob(filepath.Join(dir, "*.partial.tmpl"))
@@ -78,9 +79,8 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 		// (like 'home.page.tmpl') as the key.
 		cache[name] = ts
 
-		
 	}
-	
+
 	// return the map
 	return cache, nil
 }

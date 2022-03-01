@@ -4,10 +4,9 @@
 	<head>
 		<meta charset='utf-8'>
 		<title>{{template "title" .}} - Snippetbox</title>
-
 		<link rel='stylesheet' href='/static/css/main.css'>
 		<link rel='shortcut icon' href='/static/img/favicon.ico' type='image/x-icon'>
-		<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Ubuntu:regular,bold&subset=Latin">
+		<link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700'>
 	</head>
 	<body>
 		<header>
@@ -16,25 +15,29 @@
 		<nav>
 			<div>
 				<a href='/'>Home</a>
-				<!-- Add a link to the new form -->
-				<a href='/snippet/create'>Create snippet</a>
+				{{if .IsAuthenticated}}
+					<a href='/snippet/create'>Create snippet</a>
+				{{end}}
 			</div>
 			<div>
-				<a href="/user/signup" > Signup</a>
-				<a href="/user/login" >Login</a>
-				<form action="/user/logout" method="POST" >
-					<button>Logout</button>
-				</form>
+				{{if .IsAuthenticated}}
+					<form action='/user/logout' method='POST'>
+						<button>Logout</button>
+					</form>
+				{{else}}
+					<a href='/user/signup'>Signup</a>
+					<a href='/user/login'>Login</a>
+				{{end}}
 			</div>
 		</nav>
-		<section>
+		<main>
 			{{with .Flash}}
 				<div class='flash '>{{.}}</div>
 			{{end}}
-			{{template "body" .}}
-		</section>
+				{{template "body" .}}
+		</main>
 		{{template "footer" .}}
-		<script src='/static/js/main.js' type="text/javascript"></script>
+		<script src="/static/js/main.js" type="text/javascript"></script>
 	</body>
 </html>
 {{end}}
